@@ -88,6 +88,38 @@ class User(Base):
         verbose_name_plural = verbose_name
 
 
+class Permission(models.Model):
+    """
+    权限表
+    """
+    title = models.CharField(verbose_name='标题', max_length=32)
+    url = models.CharField(verbose_name="含正则URL", max_length=64)
+
+    class Meta:
+        db_table = 'permission'
+        verbose_name_plural = "权限表"
+
+    def __str__(self):
+        return self.title
+
+
+class Role(models.Model):
+    """
+    角色表
+    """
+    title = models.CharField(max_length=32)
+    permissions = models.ManyToManyField(Permission,
+                                         verbose_name='具有的所有权限',
+                                         blank=True)
+
+    class Meta:
+        db_table = 'role'
+        verbose_name_plural = "角色表"
+
+    def __str__(self):
+        return self.title
+
+
 class Announcement(Base):
     """
     公告表
@@ -100,11 +132,6 @@ class Announcement(Base):
                              blank=True,
                              related_name='announcementuser',
                              verbose_name='公告发起人')
-    department = models.ForeignKey(Department,
-                                   on_delete=models.SET_NULL,
-                                   null=True,
-                                   blank=True,
-                                   related_name='announcementdepartment')
 
     def __str__(self):
         return self.user.name + ':' + self.title
