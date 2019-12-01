@@ -15,7 +15,7 @@ class RBACMiddle(MiddlewareMixin):
                 # 不做任何事，返回空
                 return None
         # 2,查看当前用户是否登录，查看session
-        user_id = request.session['user_id']
+        user_id = request.session.get('user_id')
         if not user_id:
             mes['code'] = RET.SESSIONERR
             mes['message'] = error_map[RET.SESSIONERR]

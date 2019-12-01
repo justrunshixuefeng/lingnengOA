@@ -20,6 +20,7 @@ class RET:
     UPDATERROR = "10011"
     MOBILEERROR = "10012"
     PERMISSION = '4203'
+    DESERIALIZATION = '4303'
 
 
 error_map = {
@@ -44,4 +45,6 @@ error_map = {
     RET.UPDATERROR: u"更新失败",
     RET.MOBILEERROR: u"手机号不合法",
     RET.PERMISSION: u"无权限",
+    RET.DESERIALIZATION : u"反序列化错误",
+
 }

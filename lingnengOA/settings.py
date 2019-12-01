@@ -44,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ln.middleware.RBACMiddle'
 ]
 
 ROOT_URLCONF = 'lingnengOA.urls'
@@ -138,4 +139,4 @@ CORS_ALLOW_CREDENTIALS = True
 permissions_url = []
 
 # 请求白名单，在re.maht中的位置为正则表达式，所以注意格式
-WHITE_URL = ['/login/', '/admin/.*']
+WHITE_URL = ['/ln/login/', '/admin/.*']

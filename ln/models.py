@@ -29,6 +29,7 @@ class Department(Base):
                                null=True,
                                blank=True,
                                on_delete=models.SET_NULL,
+                               related_name='depar',
                                verbose_name="父类架构")
 
     class Meta:
@@ -38,6 +39,38 @@ class Department(Base):
 
     def __str__(self):
         return self.name
+
+
+class Permission(models.Model):
+    """
+    权限表
+    """
+    title = models.CharField(verbose_name='标题', max_length=32)
+    url = models.CharField(verbose_name="含正则URL", max_length=64)
+
+    class Meta:
+        db_table = 'permission'
+        verbose_name_plural = "权限表"
+
+    def __str__(self):
+        return self.title
+
+
+class Role(models.Model):
+    """
+    角色表
+    """
+    title = models.CharField(max_length=32)
+    permissions = models.ManyToManyField(Permission,
+                                         verbose_name='具有的所有权限',
+                                         blank=True)
+
+    class Meta:
+        db_table = 'role'
+        verbose_name_plural = "角色表"
+
+    def __str__(self):
+        return self.title
 
 
 class User(Base):
@@ -78,6 +111,7 @@ class User(Base):
                               blank=True,
                               default='media/default.png',
                               verbose_name='头像')
+    roles = models.ManyToManyField(Role, blank=True, related_name='user_roles', verbose_name='员工拥有的角色')
 
     def __str__(self):
         return self.name
@@ -86,38 +120,6 @@ class User(Base):
         db_table = 'user'
         verbose_name = '员工'
         verbose_name_plural = verbose_name
-
-
-class Permission(models.Model):
-    """
-    权限表
-    """
-    title = models.CharField(verbose_name='标题', max_length=32)
-    url = models.CharField(verbose_name="含正则URL", max_length=64)
-
-    class Meta:
-        db_table = 'permission'
-        verbose_name_plural = "权限表"
-
-    def __str__(self):
-        return self.title
-
-
-class Role(models.Model):
-    """
-    角色表
-    """
-    title = models.CharField(max_length=32)
-    permissions = models.ManyToManyField(Permission,
-                                         verbose_name='具有的所有权限',
-                                         blank=True)
-
-    class Meta:
-        db_table = 'role'
-        verbose_name_plural = "角色表"
-
-    def __str__(self):
-        return self.title
 
 
 class Announcement(Base):
@@ -205,7 +207,6 @@ class Leave(Base):
     type = (
         (1, '事假'),
         (2, '病假'),
-        (3, '年假'),
     )
     leave_type = models.IntegerField(choices=type, verbose_name='请假类型')
     start = models.DateTimeField(verbose_name='请假日期')
@@ -224,12 +225,11 @@ class Leave(Base):
                                 blank=True,
                                 related_name='leaveapprove',
                                 verbose_name='假条审批人')
-    leader = models.ForeignKey(User,
-                               on_delete=models.SET_NULL,
-                               null=True,
-                               blank=True,
-                               related_name='leaveleader',
-                               verbose_name='抄送人')
+    leader = models.ManyToManyField(User,
+                                    blank=True,
+                                    related_name='leaveleader',
+                                    verbose_name='抄送人')
+
     result = models.IntegerField(choices=((1, '拒绝'), (2, '通过'), (3, '等待中')),
                                  default=3,
                                  verbose_name='审批状态')
@@ -240,7 +240,6 @@ class Leave(Base):
 
     class Meta:
         db_table = 'leave'
-        unique_together = ('initiator', 'approve', 'leader')
         verbose_name = '请假'
         verbose_name_plural = verbose_name
 
@@ -265,12 +264,10 @@ class Overtime(Base):
                                 blank=True,
                                 related_name='overtimeapprove',
                                 verbose_name='假条审批人')
-    leader = models.ForeignKey(User,
-                               on_delete=models.SET_NULL,
-                               null=True,
-                               blank=True,
-                               related_name='overtimeleader',
-                               verbose_name='抄送人')
+    leader = models.ManyToManyField(User,
+                                    blank=True,
+                                    related_name='overtimeleader',
+                                    verbose_name='抄送人')
     result = models.IntegerField(choices=((1, '拒绝'), (2, '通过'), (3, '等待中')),
                                  default=3,
                                  verbose_name='审批状态')
@@ -281,7 +278,7 @@ class Overtime(Base):
 
     class Meta:
         db_table = 'overtime'
-        unique_together = ('initiator', 'approve', 'leader')
+        unique_together = ('initiator', 'approve')
         verbose_name = '加班'
         verbose_name_plural = verbose_name
 
@@ -307,12 +304,10 @@ class Evection(Base):
                                 blank=True,
                                 related_name='evectionapprove',
                                 verbose_name='出差审批人')
-    leader = models.ForeignKey(User,
-                               on_delete=models.SET_NULL,
-                               null=True,
-                               blank=True,
-                               related_name='evectionleader',
-                               verbose_name='抄送人')
+    leader = models.ManyToManyField(User,
+                                    blank=True,
+                                    related_name='evectionleader',
+                                    verbose_name='抄送人')
     result = models.IntegerField(choices=((1, '拒绝'), (2, '通过'), (3, '等待中')),
                                  default=3,
                                  verbose_name='审批状态')
@@ -323,7 +318,7 @@ class Evection(Base):
 
     class Meta:
         db_table = 'evection'
-        unique_together = ('initiator', 'approve', 'leader')
+        unique_together = ('initiator', 'approve')
         verbose_name = '出差'
         verbose_name_plural = verbose_name
 
@@ -342,12 +337,10 @@ class Log(Base):
                                   blank=True,
                                   related_name='loginitiator',
                                   verbose_name='日志发出人')
-    leader = models.ForeignKey(User,
-                               on_delete=models.SET_NULL,
-                               null=True,
-                               blank=True,
-                               related_name='logleader',
-                               verbose_name='抄送人')
+    leader = models.ManyToManyField(User,
+                                    blank=True,
+                                    related_name='logleader',
+                                    verbose_name='抄送人')
 
     def __str__(self):
         return self.initiator.name
